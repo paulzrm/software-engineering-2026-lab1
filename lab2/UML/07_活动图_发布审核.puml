@@ -1,0 +1,52 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 行为性图：商品发布审核活动图
+
+start
+:卖家创建或修改商品;
+:保存草稿;
+if (选择提交?) then (是)
+ :重新校验所有权、权限及当前状态;
+ if (已锁定或已售出?) then (是)
+  :拒绝修改，保留原商品;
+  stop
+ else (否)
+  :置待审核，暂停展示与预约;
+ endif
+ :检查字段、价格、图片实际格式、禁售词;
+ if (检查服务可用?) then (否)
+  :保留待审核，记录失败，等待重试;
+  stop
+ else (是)
+  if (规则通过?) then (是)
+   :发布为可预约，保留首次发布时间;
+   :记录审核日志，通知卖家;
+  else (否)
+   :驳回并说明原因;
+   if (申请人工复核?) then (是)
+    :管理员检查材料;
+    if (复核通过?) then (是)
+     :发布并记录复核理由;
+    else (否)
+     :保持驳回，允许修改重提;
+    endif
+   else (否)
+    :保留草稿或驳回信息;
+   endif
+  endif
+ endif
+else (否)
+ :保持草稿，不公开;
+endif
+stop
+
+@enduml

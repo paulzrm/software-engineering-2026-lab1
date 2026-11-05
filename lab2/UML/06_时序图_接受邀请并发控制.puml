@@ -1,0 +1,45 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 交互性图：接受邀请与唯一锁定时序图
+
+autonumber
+actor "当前受邀买家" as Buyer
+boundary "预约界面" as UI
+control "TradeService" as S
+database "PostgreSQL" as DB
+Buyer -> UI : 接受邀请
+UI -> S : accept(invitationId, idempotencyKey)
+S -> DB : BEGIN; 检查幂等键，锁定商品行
+S -> DB : 重查当前邀请、认证权限、截止时间与商品状态
+alt 旧邀请/过期/非当前买家/商品不可预约
+ S -> DB : ROLLBACK（业务变更）
+ S --> UI : 409状态冲突或403无权限
+ UI --> Buyer : 提示刷新，不显示锁定成功
+else 已有相同幂等请求成功结果
+ S -> DB : 读取原结果; COMMIT
+ S --> UI : 返回同一tradeId，不重复创建
+else 当前状态有效
+ S -> DB : 创建Trade(锁定标价、截止时间)
+ S -> DB : 商品置LOCKED，当前预约置LOCKED
+ S -> DB : 结束其他预约及邀请
+ S -> DB : 写操作日志和幂等响应
+ S -> DB : COMMIT
+ S --> UI : tradeId + 当前状态 + lockedPrice
+ UI --> Buyer : 显示锁定与交易截止时间
+end
+note over S,DB
+不同买家的并发请求按商品行锁串行校验。
+事务失败不得留下商品已锁定但交易不存在的状态。
+日志安全拒绝记录独立写入，不回滚成功操作记录。
+end note
+
+@enduml

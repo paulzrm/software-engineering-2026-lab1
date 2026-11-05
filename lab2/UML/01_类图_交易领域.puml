@@ -1,0 +1,115 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 结构性图：交易领域类图
+
+hide circle
+top to bottom direction
+class User {
+ - id: UUID
+ - username: String
+ - passwordHash: String
+ - status: AccountStatus
+ + canStartTrade(): boolean
+}
+class Verification {
+ - id: UUID
+ - schoolStudentKey: String
+ - realName: String
+ - state: VerificationState
+ - cardAssetId: UUID
+ + approve(reviewerId)
+ + reject(reason)
+}
+class Product {
+ - id: UUID
+ - sellerId: UUID
+ - title: String
+ - price: Decimal(10,2)
+ - state: ProductState
+ - version: long
+ + submit()
+ + lockFor(tradeId)
+ + markSold()
+}
+class Reservation {
+ - id: UUID
+ - buyerId: UUID
+ - state: ReservationState
+ + cancel(reason)
+ + close(reason)
+}
+class Invitation {
+ - id: UUID
+ - deadline: Instant
+ - state: InvitationState
+ + expire()
+ + invalidate()
+}
+class Trade {
+ - id: UUID
+ - buyerId: UUID
+ - sellerId: UUID
+ - lockedPrice: Decimal(10,2)
+ - deadline: Instant
+ - state: TradeState
+ - buyerConfirmed: boolean
+ - sellerConfirmed: boolean
+ + confirm(actorId)
+ + cancel(actorId,reason)
+ + expire(now)
+}
+class Message {
+ - id: UUID
+ - authorId: UUID
+ - content: String
+ - createdAt: Instant
+}
+class MediaAsset {
+ - id: UUID
+ - ownerId: UUID
+ - objectKey: String
+ - accessScope: AssetScope
+ + authorizeRead(actorId)
+}
+class TradeService <<application>> {
+ + acceptInvitation(actorId, invitationId, key)
+ + confirmCompletion(actorId, tradeId, key)
+ + cancelTrade(actorId, tradeId, key)
+}
+interface TradeRepository {
+ + lockProduct(productId)
+ + saveAtomically(trade, product)
+}
+User "1" -- "0..*" Product : 发布 >
+User "1" -- "0..*" Verification : 提交 >
+Product "1" -- "0..*" Reservation
+User "1" -- "0..*" Reservation : 买家 >
+Reservation "1" -- "0..*" Invitation : 历史邀请 >
+Product "1" -- "0..*" Trade : 历史交易 >
+Trade "0..1" -- "1" Invitation : 接受后创建 >
+Reservation "1" *-- "0..*" Message
+User "1" -- "0..*" MediaAsset
+Verification --> MediaAsset : 私密校园卡
+Product --> MediaAsset : 商品图片
+TradeService ..> Trade
+TradeService ..> Product
+TradeService ..> TradeRepository
+note bottom of Product
+同商品最多一笔有效锁定交易；不是只允许一笔历史交易。
+已预约是有效意向提示，不是独占锁定状态。
+end note
+note bottom of Verification
+同学号最多一个审核通过账号。
+买家和卖家是User的业务角色，不分成互斥子类。
+end note
+
+@enduml

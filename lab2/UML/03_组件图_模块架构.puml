@@ -1,0 +1,63 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 结构性图：模块化单体组件图
+
+left to right direction
+component "用户端 / 管理端
+Web UI" as UI
+component "HTTP入口
+会话·RBAC·幂等" as API
+package "应用服务（同一进程）" {
+ component "账号与校园卡认证" as Auth
+ component "商品与自动审核" as Product
+ component "预约与交易" as Trade
+ component "信用与答题" as Credit
+ component "举报·投票·申诉" as Case
+ component "查询·统计·日志" as Query
+}
+component "定时任务
+到期释放·备份" as Job
+component "持久化适配器
+Repository / UnitOfWork" as Repo
+database "PostgreSQL
+关系·状态·约束·日志" as DB
+storage "对象存储
+商品图 / 私密证据" as Files
+UI --> API : HTTPS
+API --> Auth
+API --> Product
+API --> Trade
+API --> Credit
+API --> Case
+API --> Query
+Trade --> Auth : 交易权限
+Trade --> Credit : 取消计罚
+Case --> Trade : 争议裁决
+Case --> Credit : 爽约认定/撤销
+Product --> Trade : 违规下架联动
+Job --> Trade : expire(now)
+Auth --> Repo
+Product --> Repo
+Trade --> Repo
+Credit --> Repo
+Case --> Repo
+Query --> Repo
+Repo --> DB
+Repo --> Files : 私密访问鉴权
+Job --> DB : 每日备份
+note bottom of Repo
+跨业务状态在同一数据库事务内更新。
+上传图片先暂存，通过业务提交后绑定；
+孤立暂存文件由清理任务回收。
+end note
+
+@enduml

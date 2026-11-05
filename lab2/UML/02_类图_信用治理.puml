@@ -1,0 +1,108 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 结构性图：信用与治理类图
+
+hide circle
+class CreditAccount {
+ - userId: UUID
+ - score: int
+ - version: long
+ + replay(events)
+ + grade(): CreditGrade
+}
+class CreditEvent {
+ - id: long
+ - userId: UUID
+ - tradeId: UUID?
+ - kind: EventKind
+ - occurredAt: Instant
+ - amount: int
+ - revoked: boolean
+}
+interface PenaltyPolicy {
+ + penalty(count): int
+ + windowDays(): int
+}
+class CancellationPolicy {
+ + penalty(count): int
+ + windowDays(): int = 7
+}
+class NoShowPolicy {
+ + penalty(count): int
+ + windowDays(): int = 30
+}
+class CreditService {
+ + recordCancellation(tradeId, actorId)
+ + recognizeNoShow(caseId, actorId)
+ + revokeRecognition(eventId)
+ + mergeAndReplay(userId)
+}
+class QuizAttempt {
+ - userId: UUID
+ - localDate: Date
+ - answers: JSON
+ - correctCount: int
+ + submit()
+}
+class ModerationCase {
+ - id: UUID
+ - targetType: TargetType
+ - targetId: UUID
+ - reporterId: UUID
+ - state: CaseState
+ - publicSummary: String
+ + startVote(deadline)
+ + decide(action,reason)
+ + appeal(actorId,reason)
+}
+class CaseEvidence {
+ - submitterId: UUID
+ - mediaAssetId: UUID
+ - explanation: String
+ + authorizeRead(actorId)
+}
+class Vote {
+ - caseId: UUID
+ - voterId: UUID
+ - choice: VoteChoice
+ - createdAt: Instant
+}
+class AuditEntry {
+ - actorId: UUID
+ - action: String
+ - targetType: String
+ - targetId: UUID
+ - result: String
+ - occurredAt: Instant
+}
+PenaltyPolicy <|.. CancellationPolicy
+PenaltyPolicy <|.. NoShowPolicy
+CreditService ..> PenaltyPolicy
+CreditService ..> CreditAccount
+CreditService ..> ModerationCase
+CreditAccount "1" *-- "0..*" CreditEvent
+QuizAttempt --> CreditEvent : 全对恢复事件
+ModerationCase "1" *-- "0..*" CaseEvidence
+ModerationCase "1" *-- "0..*" Vote
+ModerationCase --> CreditService : 核实后才计罚
+CreditService ..> AuditEntry
+ModerationCase ..> AuditEntry
+note bottom of CreditAccount
+按(occurredAt,id)顺序重放；每事件后限制0..100。
+同笔同人取较高罚分，误判撤销保留更正历史。
+end note
+note bottom of Vote
+唯一(caseId,voterId)；涉事双方及受限用户不可投票。
+投票不触发自动处罚，最终由管理员裁决。
+end note
+
+@enduml

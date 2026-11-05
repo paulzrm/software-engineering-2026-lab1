@@ -1,0 +1,59 @@
+@startuml
+skinparam defaultFontName Microsoft YaHei
+skinparam defaultFontSize 16
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #32665C
+skinparam classBackgroundColor #F3F8F5
+skinparam classBorderColor #71978A
+skinparam packageBackgroundColor #FFFFFF
+skinparam roundcorner 8
+skinparam dpi 160
+title 行为性图：用户角色用例图
+
+left to right direction
+actor "浏览者" as Guest
+actor "已认证用户" as User
+actor "买家" as Buyer
+actor "卖家" as Seller
+actor "管理员" as Admin
+User --|> Guest
+Buyer --|> User
+Seller --|> User
+rectangle "校内二手交易系统" {
+ usecase "组合查询与排序" as Search
+ usecase "注册登录/提交认证" as Register
+ usecase "商品草稿/发布/修改/下架" as Publish
+ usecase "自动审核/人工复核" as Audit
+ usecase "预约/接受当前邀请" as Reserve
+ usecase "选择预约者与截止时间" as Select
+ usecase "取消/双方确认完成" as Complete
+ usecase "信用查询/每日答题" as Credit
+ usecase "举报/举证/申诉" as Report
+ usecase "匿名公众投票" as Vote
+ usecase "个人统计与本人日志" as Stats
+ usecase "认证核验/违规与争议裁决" as Review
+ usecase "日志查询/账号限制" as Logs
+}
+Guest --> Search
+Guest --> Register
+Seller --> Publish
+Publish ..> Audit : <<include>>
+提交或修改后
+Buyer --> Reserve
+Seller --> Select
+Buyer --> Complete
+Seller --> Complete
+User --> Credit
+User --> Report
+User --> Vote
+User --> Stats
+Admin --> Audit
+Admin --> Review
+Admin --> Logs
+note bottom of Vote
+只向非涉事且未受限用户开放；一人一票。
+校园卡及原始举报证据不向公众展示。
+end note
+
+@enduml
