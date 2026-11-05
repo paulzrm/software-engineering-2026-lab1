@@ -1,0 +1,151 @@
+{
+  "fileKey": "MzYfVETDV1TPYxcXBlAaxM",
+  "sessionId": "70347af4-2abb-4f42-ba79-8fc08adf77e9",
+  "font": "Noto Sans SC",
+  "screens": [
+    {
+      "id": "6:189",
+      "name": "01_账号登录与注册",
+      "req": "REQ-001 / 038",
+      "width": 1280,
+      "height": 900,
+      "descendants": 57,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-189"
+    },
+    {
+      "id": "6:263",
+      "name": "02_学生身份认证",
+      "req": "REQ-003 / 037",
+      "width": 1280,
+      "height": 900,
+      "descendants": 55,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-263"
+    },
+    {
+      "id": "6:331",
+      "name": "03_发现校园好物",
+      "req": "REQ-009 / 010",
+      "width": 1280,
+      "height": 900,
+      "descendants": 110,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-331"
+    },
+    {
+      "id": "6:452",
+      "name": "04_商品详情与购买意向",
+      "req": "REQ-011 / 014 / 023",
+      "width": 1280,
+      "height": 900,
+      "descendants": 54,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-452"
+    },
+    {
+      "id": "6:523",
+      "name": "05_发布与编辑商品",
+      "req": "REQ-004—008",
+      "width": 1280,
+      "height": 900,
+      "descendants": 62,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-523"
+    },
+    {
+      "id": "6:602",
+      "name": "06_我的商品与审核结果",
+      "req": "REQ-005—008",
+      "width": 1280,
+      "height": 900,
+      "descendants": 71,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-602"
+    },
+    {
+      "id": "6:684",
+      "name": "07_预约与邀请管理",
+      "req": "REQ-011—013",
+      "width": 1280,
+      "height": 900,
+      "descendants": 69,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-684"
+    },
+    {
+      "id": "6:764",
+      "name": "08_线下交易进度",
+      "req": "REQ-015—019",
+      "width": 1280,
+      "height": 900,
+      "descendants": 62,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-764"
+    },
+    {
+      "id": "6:845",
+      "name": "09_信用与记录",
+      "req": "REQ-020—024",
+      "width": 1280,
+      "height": 900,
+      "descendants": 63,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-845"
+    },
+    {
+      "id": "6:913",
+      "name": "10_每日交易规则答题",
+      "req": "REQ-024",
+      "width": 1280,
+      "height": 900,
+      "descendants": 66,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-913"
+    },
+    {
+      "id": "6:984",
+      "name": "11_举报、争议与申诉",
+      "req": "REQ-018 / 019 / 025 / 028",
+      "width": 1280,
+      "height": 900,
+      "descendants": 57,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-984"
+    },
+    {
+      "id": "6:1056",
+      "name": "12_匿名公众评议",
+      "req": "REQ-026 / 027",
+      "width": 1280,
+      "height": 900,
+      "descendants": 47,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-1056"
+    },
+    {
+      "id": "6:1116",
+      "name": "13_认证与商品审核",
+      "req": "REQ-005 / 006 / 037",
+      "width": 1280,
+      "height": 900,
+      "descendants": 67,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-1116"
+    },
+    {
+      "id": "6:1200",
+      "name": "14_案件处理与账号限制",
+      "req": "REQ-025—028",
+      "width": 1280,
+      "height": 900,
+      "descendants": 67,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-1200"
+    },
+    {
+      "id": "6:1286",
+      "name": "15_关键操作日志",
+      "req": "REQ-029 / 031",
+      "width": 1280,
+      "height": 900,
+      "descendants": 76,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-1286"
+    },
+    {
+      "id": "6:1373",
+      "name": "16_个人交易统计",
+      "req": "REQ-030",
+      "width": 1280,
+      "height": 900,
+      "descendants": 58,
+      "url": "https://www.figma.com/design/MzYfVETDV1TPYxcXBlAaxM?node-id=6-1373"
+    }
+  ]
+}

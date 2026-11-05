@@ -16,7 +16,7 @@ skinparam roundcorner 8
 skinparam dpi 160
 '''
 diagrams={
-'01_类图_交易领域':('结构性图：交易领域类图', '''
+'01_类图_交易领域':('结构性图：交易领域类图', r'''
 hide circle
 top to bottom direction
 class User {
@@ -39,7 +39,7 @@ class Product {
  - id: UUID
  - sellerId: UUID
  - title: String
- - price: Decimal(10,2)
+ {field} - price: Decimal(10,2)
  - state: ProductState
  - version: long
  + submit()
@@ -64,7 +64,7 @@ class Trade {
  - id: UUID
  - buyerId: UUID
  - sellerId: UUID
- - lockedPrice: Decimal(10,2)
+ {field} - lockedPrice: Decimal(10,2)
  - deadline: Instant
  - state: TradeState
  - buyerConfirmed: boolean
@@ -118,7 +118,7 @@ note bottom of Verification
 买家和卖家是User的业务角色，不分成互斥子类。
 end note
 '''),
-'02_类图_信用治理':('结构性图：信用与治理类图','''
+'02_类图_信用治理':('结构性图：信用与治理类图',r'''
 hide circle
 class CreditAccount {
  - userId: UUID
@@ -213,7 +213,7 @@ note bottom of Vote
 投票不触发自动处罚，最终由管理员裁决。
 end note
 '''),
-'03_组件图_模块架构':('结构性图：模块化单体组件图','''
+'03_组件图_模块架构':('结构性图：模块化单体组件图',r'''
 left to right direction
 component "用户端 / 管理端\nWeb UI" as UI
 component "HTTP入口\n会话·RBAC·幂等" as API
@@ -257,7 +257,7 @@ note bottom of Repo
 孤立暂存文件由清理任务回收。
 end note
 '''),
-'04_用例图_角色权限':('行为性图：用户角色用例图','''
+'04_用例图_角色权限':('行为性图：用户角色用例图',r'''
 left to right direction
 actor "浏览者" as Guest
 actor "已认证用户" as User
@@ -302,7 +302,7 @@ note bottom of Vote
 校园卡及原始举报证据不向公众展示。
 end note
 '''),
-'05_状态图_交易生命周期':('行为性图：锁定交易状态图','''
+'05_状态图_交易生命周期':('行为性图：锁定交易状态图',r'''
 state "已锁定/无人确认" as Locked
 state "买家已确认" as BuyerOK
 state "卖家已确认" as SellerOK
@@ -336,7 +336,7 @@ note bottom of Completed
 取消/到期释放商品可预约，但原其他预约不复活。
 end note
 '''),
-'06_时序图_接受邀请并发控制':('交互性图：接受邀请与唯一锁定时序图','''
+'06_时序图_接受邀请并发控制':('交互性图：接受邀请与唯一锁定时序图',r'''
 autonumber
 actor "当前受邀买家" as Buyer
 boundary "预约界面" as UI
@@ -344,23 +344,29 @@ control "TradeService" as S
 database "PostgreSQL" as DB
 Buyer -> UI : 接受邀请
 UI -> S : accept(invitationId, idempotencyKey)
-S -> DB : BEGIN; 检查幂等键，锁定商品行
-S -> DB : 重查当前邀请、认证权限、截止时间与商品状态
-alt 旧邀请/过期/非当前买家/商品不可预约
- S -> DB : ROLLBACK（业务变更）
- S --> UI : 409状态冲突或403无权限
- UI --> Buyer : 提示刷新，不显示锁定成功
-else 已有相同幂等请求成功结果
+S -> DB : BEGIN; 按用户/动作/键读取幂等记录和参数摘要
+alt 同键、同参数已有成功结果
  S -> DB : 读取原结果; COMMIT
- S --> UI : 返回同一tradeId，不重复创建
-else 当前状态有效
- S -> DB : 创建Trade(锁定标价、截止时间)
- S -> DB : 商品置LOCKED，当前预约置LOCKED
- S -> DB : 结束其他预约及邀请
- S -> DB : 写操作日志和幂等响应
- S -> DB : COMMIT
- S --> UI : tradeId + 当前状态 + lockedPrice
- UI --> Buyer : 显示锁定与交易截止时间
+ S --> UI : 返回原tradeId，不重新校验可预约状态
+else 同键不同参数
+ S -> DB : ROLLBACK
+ S --> UI : 409 幂等键冲突
+else 新请求
+ S -> DB : 占用幂等键，锁定商品行
+ S -> DB : 重查当前邀请、认证权限、截止时间与商品状态
+ alt 旧邀请/过期/非当前买家/商品不可预约
+  S -> DB : ROLLBACK（业务变更）
+  S --> UI : 409状态冲突或403无权限
+  UI --> Buyer : 提示刷新，不显示锁定成功
+ else 当前状态有效
+  S -> DB : 创建Trade(锁定标价、截止时间)
+  S -> DB : 商品置LOCKED，当前预约置LOCKED
+  S -> DB : 结束其他预约及邀请
+  S -> DB : 写操作日志和幂等响应
+  S -> DB : COMMIT
+  S --> UI : tradeId + 当前状态 + lockedPrice
+  UI --> Buyer : 显示锁定与交易截止时间
+ end
 end
 note over S,DB
 不同买家的并发请求按商品行锁串行校验。
@@ -368,7 +374,7 @@ note over S,DB
 日志安全拒绝记录独立写入，不回滚成功操作记录。
 end note
 '''),
-'07_活动图_发布审核':('行为性图：商品发布审核活动图','''
+'07_活动图_发布审核':('行为性图：商品发布审核活动图',r'''
 start
 :卖家创建或修改商品;
 :保存草稿;

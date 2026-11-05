@@ -18,23 +18,29 @@ control "TradeService" as S
 database "PostgreSQL" as DB
 Buyer -> UI : 接受邀请
 UI -> S : accept(invitationId, idempotencyKey)
-S -> DB : BEGIN; 检查幂等键，锁定商品行
-S -> DB : 重查当前邀请、认证权限、截止时间与商品状态
-alt 旧邀请/过期/非当前买家/商品不可预约
- S -> DB : ROLLBACK（业务变更）
- S --> UI : 409状态冲突或403无权限
- UI --> Buyer : 提示刷新，不显示锁定成功
-else 已有相同幂等请求成功结果
+S -> DB : BEGIN; 按用户/动作/键读取幂等记录和参数摘要
+alt 同键、同参数已有成功结果
  S -> DB : 读取原结果; COMMIT
- S --> UI : 返回同一tradeId，不重复创建
-else 当前状态有效
- S -> DB : 创建Trade(锁定标价、截止时间)
- S -> DB : 商品置LOCKED，当前预约置LOCKED
- S -> DB : 结束其他预约及邀请
- S -> DB : 写操作日志和幂等响应
- S -> DB : COMMIT
- S --> UI : tradeId + 当前状态 + lockedPrice
- UI --> Buyer : 显示锁定与交易截止时间
+ S --> UI : 返回原tradeId，不重新校验可预约状态
+else 同键不同参数
+ S -> DB : ROLLBACK
+ S --> UI : 409 幂等键冲突
+else 新请求
+ S -> DB : 占用幂等键，锁定商品行
+ S -> DB : 重查当前邀请、认证权限、截止时间与商品状态
+ alt 旧邀请/过期/非当前买家/商品不可预约
+  S -> DB : ROLLBACK（业务变更）
+  S --> UI : 409状态冲突或403无权限
+  UI --> Buyer : 提示刷新，不显示锁定成功
+ else 当前状态有效
+  S -> DB : 创建Trade(锁定标价、截止时间)
+  S -> DB : 商品置LOCKED，当前预约置LOCKED
+  S -> DB : 结束其他预约及邀请
+  S -> DB : 写操作日志和幂等响应
+  S -> DB : COMMIT
+  S --> UI : tradeId + 当前状态 + lockedPrice
+  UI --> Buyer : 显示锁定与交易截止时间
+ end
 end
 note over S,DB
 不同买家的并发请求按商品行锁串行校验。

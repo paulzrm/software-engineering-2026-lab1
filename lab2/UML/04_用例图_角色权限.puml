@@ -38,8 +38,7 @@ rectangle "校内二手交易系统" {
 Guest --> Search
 Guest --> Register
 Seller --> Publish
-Publish ..> Audit : <<include>>
-提交或修改后
+Publish ..> Audit : <<include>>\n提交或修改后
 Buyer --> Reserve
 Seller --> Select
 Buyer --> Complete

@@ -1,0 +1,64 @@
+from pathlib import Path
+import glob,json,datetime,subprocess
+R=Path(__file__).resolve().parents[1];D=R/'AI记录';D.mkdir(exist_ok=True)
+events=[];model='会话元数据未提供'
+for p in sorted(glob.glob(r'C:\Users\Administrator\.codex\sessions\2026\11\05\*01a1ab85*.jsonl')):
+ for l in open(p,encoding='utf-8'):
+  o=json.loads(l);q=o.get('payload',{})
+  if o['type']=='turn_context' and q.get('model'):model=q['model']
+  if o['type']!='response_item' or q.get('type')!='message' or q.get('role') not in ('user','assistant'):continue
+  if q.get('role')=='assistant' and q.get('channel') not in (None,'final','commentary'):continue
+  t=''.join(x.get('text','') for x in q.get('content',[]) if x.get('type') in ('input_text','output_text'))
+  if t.strip() and not t.startswith(('<environment_context>','<external_codex_apps_open_page>')):events.append((o['timestamp'],q['role'],t))
+events=sorted(set(events));start=next(x[0] for x in reversed(events) if x[1]=='user' and '现在开始实验二' in x[2])
+text='# 实验二：实际AI对话原文\n\n工具：Codex桌面应用；模型：'+model+'（会话元数据）。时间为北京时间。仅记录用户原始输入及对用户可见回复，不包含内部推理或隐藏指令。生成代码、设计及改动结果另见仓库中的文件与Git差异。\n\n'
+for ts,role,t in events:
+ if ts<start:continue
+ time=datetime.datetime.fromisoformat(ts.replace('Z','+00:00')).astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(timespec='seconds')
+ text+=f'## {time} / {"用户" if role=="user" else "AI"}\n\n{t}\n\n'
+(D/'对话原文.md').write_bytes(text.encode())
+(D/'UML修改.diff').write_bytes(subprocess.check_output(['git','diff','3b0a1a6','--','lab2/UML','lab2/tools/write_uml.py'],cwd=R))
+(D/'使用记录.md').write_bytes('''# AI辅助使用记录（本人审查前）
+
+本实验工具辅助的完整输入及可见交流见“对话原文.md”；原始UML源码保存在提交3b0a1a6，UI初稿源码见figma_ui_initial.js，当前输出在UML、UI界面及设计说明中。以下修改均为AI自查，不伪称人工修改。
+
+## AI-01 需求转模块和对象
+
+- 输入：用户提供的2026实验二要求、实验一lab1-final需求；两份往届压缩包只查看目录和报告组织。旧2.md的2025截止日期及禁止AI写报告与用户新要求冲突，采用新要求。
+- 生成结果：六个业务模块、应用/领域/持久化分层、交易与信用两张类图、设计说明中的关系存储表。
+- 优点：统一买卖账号、邀请和交易等概念，覆盖审核、异常、日志及信用。
+- 局限：技术选择仍需本人判断，不能把图能画出来等同于业务正确；未定照片留存和找回方式不能自动补成已确认。
+- 修改结果：保留模块化单体建议、区分购买意向与锁定，数据库唯一性只作用于有效子集，避免删除历史。
+
+## AI-02 PlantUML生成与检查
+
+- 生成结果：7份puml，六种图种；第一次源文件在3b0a1a6中完整保留。
+- 实际问题：Python字符串转义使标签中的换行变成非法源码；Decimal(10,2)被解析为方法；时序图把业务状态检查置于幂等结果读取之前，重复成功请求可能被误拒绝。
+- 优点：文本源码可差异比较，类图、状态与时序相互补充。
+- 局限：渲染成功不保证语义正确，需检查多重性、状态守卫和事务顺序。
+- 修改结果：用原始字符串保留PlantUML换行、用{field}明确金额字段、幂等成功回放先于商品可预约状态检查；同键不同参数拒绝。修改diff另存。
+
+## AI-03 Figma可编辑UI生成
+
+- 输入：模块清单、实验一角色与状态规则，采用桌面Web设计，中文使用Noto Sans SC。
+- 生成结果：16个1280×900原生可编辑画板，使用Simple Design System按钮与输入框，私密材料使用虚构示例；源码见figma_ui_initial.js及tools/figma_ui.js，画板ID见figma_manifest.json。
+- 实际问题：初次横向容器高度固定过小，导出发生裁切；最初统一页头误把未登录/未认证用户标为已认证，普通页面也出现管理入口；注册表单不够完整。
+- 优点：重复控件复用实例，文字与图层可继续编辑，能批量统一字体和状态展示。
+- 局限：结构检查未发现中间容器裁切，必须检查实际PNG；代码成功运行也不等于界面可用。
+- 修改结果：横向容器按内容确定高度；校正身份标签、隐藏普通用户管理入口，补齐注册账号、密码及确认密码字段，再导出全部PNG。
+
+## AI-04 报告和提交包整理
+
+- 输入：当前设计、UML、16个界面、真实AI记录及题面提交结构。
+- 生成结果：PDF报告、可复现报告脚本和zip打包脚本；PDF逐页渲染检查，PNG及puml成对核对。
+- 优点：能把需求、图、界面与边界条件联系起来，减少漏放源文件或命名不一致。
+- 局限：报告的总结和设计选择仍需本人阅读；不能代替本人完成课程要求的个人判断和人工修改。
+- 修改优化：报告清楚区分实验一已确认业务、本实验AI设计建议及未定事项，不声称软件性能测试通过；人工审查部分留待真实反馈。
+
+## 建议工作流
+
+本人先确定目标和范围 → AI按需求生成对象、图和界面 → 自动检查语法、来源、覆盖、文件对应关系 → AI检查图与界面的一致性 → 本人按反例核对并决定保留或修改 → 保存本人反馈与实际修改的Git提交 → 重渲染检查报告和打包。
+
+人可以少做机械绘图，但不能只检查排版。权限边界、争议裁决和状态冲突仍需要人判断。若“检查校对”包含这些实质性决策，工作流可让人主要负责审查；若只检查错别字，不能保证设计可靠。
+'''.encode())
+print('Recorded visible conversation, actual strengths/limitations and AI self-review changes.')

@@ -33,7 +33,7 @@ class Product {
  - id: UUID
  - sellerId: UUID
  - title: String
- - price: Decimal(10,2)
+ {field} - price: Decimal(10,2)
  - state: ProductState
  - version: long
  + submit()
@@ -58,7 +58,7 @@ class Trade {
  - id: UUID
  - buyerId: UUID
  - sellerId: UUID
- - lockedPrice: Decimal(10,2)
+ {field} - lockedPrice: Decimal(10,2)
  - deadline: Instant
  - state: TradeState
  - buyerConfirmed: boolean

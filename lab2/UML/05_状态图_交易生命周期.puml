@@ -19,22 +19,18 @@ state "双方确认完成" as Completed
 state "主动取消" as Cancelled
 state "超时释放" as Expired
 state "管理员解除" as Released
-[*] --> Locked : 当前受邀买家接受
-[截止前且商品可预约]
+[*] --> Locked : 当前受邀买家接受\n[截止前且商品可预约]
 Locked --> BuyerOK : 买家确认
 Locked --> SellerOK : 卖家确认
 BuyerOK --> Completed : 卖家确认
 SellerOK --> Completed : 买家确认
 Locked --> Cancelled : 买家或卖家主动取消
 Locked --> Expired : 到期且无人确认
-BuyerOK --> Disputed : 任一方提交争议
-或管理员违规下架
-SellerOK --> Disputed : 任一方提交争议
-或管理员违规下架
+BuyerOK --> Disputed : 任一方提交争议\n或管理员违规下架
+SellerOK --> Disputed : 任一方提交争议\n或管理员违规下架
 Disputed --> Completed : 管理员裁决完成
 Disputed --> Released : 管理员裁决解除
-Locked --> Released : 管理员违规下架
-无单方确认，不自动扣分
+Locked --> Released : 管理员违规下架\n无单方确认，不自动扣分
 Cancelled --> [*]
 Expired --> [*]
 Released --> [*]

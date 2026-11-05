@@ -12,10 +12,8 @@ skinparam dpi 160
 title 结构性图：模块化单体组件图
 
 left to right direction
-component "用户端 / 管理端
-Web UI" as UI
-component "HTTP入口
-会话·RBAC·幂等" as API
+component "用户端 / 管理端\nWeb UI" as UI
+component "HTTP入口\n会话·RBAC·幂等" as API
 package "应用服务（同一进程）" {
  component "账号与校园卡认证" as Auth
  component "商品与自动审核" as Product
@@ -24,14 +22,10 @@ package "应用服务（同一进程）" {
  component "举报·投票·申诉" as Case
  component "查询·统计·日志" as Query
 }
-component "定时任务
-到期释放·备份" as Job
-component "持久化适配器
-Repository / UnitOfWork" as Repo
-database "PostgreSQL
-关系·状态·约束·日志" as DB
-storage "对象存储
-商品图 / 私密证据" as Files
+component "定时任务\n到期释放·备份" as Job
+component "持久化适配器\nRepository / UnitOfWork" as Repo
+database "PostgreSQL\n关系·状态·约束·日志" as DB
+storage "对象存储\n商品图 / 私密证据" as Files
 UI --> API : HTTPS
 API --> Auth
 API --> Product
