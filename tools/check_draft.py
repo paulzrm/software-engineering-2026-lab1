@@ -11,8 +11,9 @@ for block in re.split(r'^## REQ-\d{3} ',s,flags=re.M)[1:]:
     assert re.findall(r'^- ([^：\n]+)：',block,re.M)==fields
     for x in re.findall(r'REQ-\d{3}',block): assert x in ids, x
     for x in re.findall(r'INT-\d{2}-L\d{3}',block): assert re.search(r'^'+x+r' ',c,re.M),x
-assert '```markdown\n'+s+'```' in c
-for name,content in [('requirements.md',req),('chat.txt',chat)]:
-    tagged=subprocess.check_output(['git','show','lab1-ai-draft:'+name],cwd=root)
-    assert tagged==content, f'{name}: worktree bytes differ from tag'
-print(json.dumps({'requirements':len(ids),'functional':s.count('- 类型：功能需求'),'nonfunctional':s.count('- 类型：非功能需求'),'confirmed':s.count('- 状态：已确认'),'pending':s.count('- 状态：待确认'),'draft_sha':subprocess.check_output(['git','rev-parse','lab1-ai-draft'],cwd=root,text=True).strip(),'checks':'IDs, fields, source references, preserved first output, exact tag bytes all pass'},ensure_ascii=False,indent=2))
+initial=subprocess.check_output(['git','show','lab1-ai-draft:requirements.md'],cwd=root).decode()
+initial_chat=subprocess.check_output(['git','show','lab1-ai-draft:chat.txt'],cwd=root).decode()
+assert '```markdown\n'+initial+'```' in c
+assert '```markdown\n'+initial+'```' in initial_chat
+assert subprocess.check_output(['git','rev-parse','lab1-ai-draft'],cwd=root,text=True).strip()=='325d606d2e2bc7ff82a2f67329f19c0ad4b1316d'
+print(json.dumps({'requirements':len(ids),'functional':s.count('- 类型：功能需求'),'nonfunctional':s.count('- 类型：非功能需求'),'confirmed':s.count('- 状态：已确认'),'changed':s.count('- 状态：已变更'),'rejected':s.count('- 状态：已拒绝'),'pending':s.count('- 状态：待确认'),'draft_sha':subprocess.check_output(['git','rev-parse','lab1-ai-draft'],cwd=root,text=True).strip(),'checks':'IDs, fields, source references, preserved first output and immutable initial tag all pass'},ensure_ascii=False,indent=2))
